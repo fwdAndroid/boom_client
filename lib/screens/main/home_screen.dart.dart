@@ -1,23 +1,12 @@
 import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:boom_client/maps/map_service.dart';
 import 'package:boom_client/screens/main/ride_request.dart';
-import 'package:boom_client/screens/profile/edit_profile.dart';
+import 'package:boom_client/screens/widgets/my_drawer.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
-import 'package:boom_client/utils/colors.dart';
-import 'package:boom_client/widgets/customer_logout_widget.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:share/share.dart';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,7 +23,7 @@ class _HomePageState extends State<HomePage> {
       const CameraPosition(target: LatLng(51.1657, 10.4515));
   bool _isLoading = false;
   List latlong = [];
-  String location = 'Please move map to A specific location.';
+  String location = 'Please move map to a specific location.';
   final TextEditingController _locationController = TextEditingController();
   BitmapDescriptor? customMarkerIcon;
 
@@ -93,16 +82,6 @@ class _HomePageState extends State<HomePage> {
 
   List<Marker> markers = [];
 
-  void shareInviteLink(BuildContext context) {
-    // Replace 'YOUR_INVITE_LINK' with your actual invite link
-    final String inviteLink = 'https://yourapp.com/invite?ref=friend123';
-
-    Share.share(
-      'Join our app using my invite link: $inviteLink',
-      subject: 'Join us on the app!',
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     LatLng startLocation = _isLoading
@@ -110,129 +89,19 @@ class _HomePageState extends State<HomePage> {
         : LatLng(latlong[0], latlong[1]);
     return Scaffold(
         appBar: AppBar(),
-        drawer: Drawer(
-          child: Column(
-            children: [
-              Container(
-                width: 300,
-                height: 270,
-                color: Color(0xffA52A2A),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection("clients")
-                            .doc(FirebaseAuth.instance.currentUser!.uid)
-                            .snapshots(),
-                        builder: (context, AsyncSnapshot snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                          if (!snapshot.hasData || snapshot.data == null) {
-                            return Center(child: Text('No data available'));
-                          }
-                          var snap = snapshot.data;
-
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage:
-                                      NetworkImage(snap['photoURL']),
-                                ),
-                                Text(
-                                  snap['fullName'],
-                                  style: GoogleFonts.workSans(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 22),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                  ],
-                ),
-              ),
-              ListTile(
-                title: const Text("Home"),
-                leading: Icon(
-                  Icons.home,
-                  color: iconColor,
-                ),
-              ),
-              ListTile(
-                title: const Text("Wallet"),
-                leading: Icon(
-                  Icons.wallet,
-                  color: iconColor,
-                ),
-              ),
-              ListTile(
-                title: const Text("History"),
-                leading: Icon(
-                  Icons.history,
-                  color: iconColor,
-                ),
-              ),
-              ListTile(
-                title: const Text("Notifications"),
-                leading: Icon(
-                  Icons.notifications,
-                  color: iconColor,
-                ),
-              ),
-              ListTile(
-                onTap: () {
-                  shareInviteLink(context);
-                },
-                title: const Text("Invite Friends"),
-                leading: Icon(
-                  Icons.child_friendly_sharp,
-                  color: iconColor,
-                ),
-              ),
-              ListTile(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (builder) => const EditProfile()));
-                },
-                title: Text("Setting"),
-                leading: Icon(
-                  Icons.settings,
-                  color: iconColor,
-                ),
-              ),
-              ListTile(
-                onTap: () {
-                  showDialog<void>(
-                    context: context,
-                    barrierDismissible: false, // user must tap button!
-                    builder: (BuildContext context) {
-                      return CustomerLogoutWidget();
-                    },
-                  );
-                },
-                title: Text("Logout"),
-                leading: Icon(
-                  Icons.logout,
-                  color: Color(0xffC1C0C9),
-                ),
-              ),
-            ],
-          ),
-        ),
+        drawer: MyDrawer(),
         floatingActionButton: FloatingActionButton(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           backgroundColor: Colors.white,
-          onPressed: () {},
+          onPressed: () async {
+            Position position = await getUserCurrentLocation();
+            mapController?.animateCamera(CameraUpdate.newCameraPosition(
+              CameraPosition(
+                  target: LatLng(position.latitude, position.longitude),
+                  zoom: 14),
+            ));
+          },
           child: Icon(Icons.location_pin),
         ),
         body: Stack(
@@ -300,12 +169,28 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isLoading = true;
     });
-    await Geolocator.requestPermission().then((value) async {
-      print(
-          'getUserCurrentLocation:$value:${await Geolocator.getCurrentPosition()}');
-    }).onError((error, stackTrace) {
-      print("error" + error.toString());
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      _isLoading = false;
     });
-    return await Geolocator.getCurrentPosition();
+    return position;
   }
 }
