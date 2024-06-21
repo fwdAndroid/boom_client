@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:boom_client/maps/map_functions.dart';
 import 'package:boom_client/maps/map_service.dart';
 import 'package:boom_client/screens/main/ride_request.dart';
 import 'package:boom_client/screens/widgets/my_drawer.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
+import 'package:boom_client/utils/key_const.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
@@ -17,7 +19,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String googleApikey = "AIzaSyBWZFXbVQj9EPhSBeFGneVgrODOgU_hHTg";
+  String googleApikey = googleMapKey;
   GoogleMapController? mapController;
   CameraPosition cameraPosition =
       const CameraPosition(target: LatLng(51.1657, 10.4515));
@@ -34,7 +36,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   init() async {
-    await getUserCurrentLocation().then((value) async {
+    await MapFunctions().getUserCurrentLocation().then((value) async {
       print("value.latitude:${value.latitude}");
       markers.add(Marker(
           markerId: MarkerId("2"),
@@ -95,7 +97,7 @@ class _HomePageState extends State<HomePage> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           backgroundColor: Colors.white,
           onPressed: () async {
-            Position position = await getUserCurrentLocation();
+            Position position = await MapFunctions().getUserCurrentLocation();
             mapController?.animateCamera(CameraUpdate.newCameraPosition(
               CameraPosition(
                   target: LatLng(position.latitude, position.longitude),
@@ -150,7 +152,7 @@ class _HomePageState extends State<HomePage> {
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: SaveButton(
-                    title: "Apply",
+                    title: "Search Ride",
                     onTap: () async {
                       Navigator.push(
                           context,
@@ -163,34 +165,5 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ));
-  }
-
-  Future<Position> getUserCurrentLocation() async {
-    setState(() {
-      _isLoading = true;
-    });
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _isLoading = false;
-    });
-    return position;
   }
 }
