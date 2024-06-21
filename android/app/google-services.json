@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "575261100821",
+    "project_id": "boom-1b98b",
+    "storage_bucket": "boom-1b98b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575261100821:android:d286a75b203af13cf8771c",
+        "android_client_info": {
+          "package_name": "com.example.boom_client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "575261100821-kpndmjikquo3ljvr5jbbk8bim2r1kuql.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwLuZU5HqcqGAIVT8qZ2VlvY8l6GqdKVk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "575261100821-kpndmjikquo3ljvr5jbbk8bim2r1kuql.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "575261100821-uraomtnhp2rcfqtgo2o8hl7v4qvbn6rf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.boomDriver"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575261100821:android:9a7b40f42e104a3ff8771c",
+        "android_client_info": {
+          "package_name": "com.example.boom_driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "575261100821-rsgdvvp7slfta3emrd6elqkc6rsth7rj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.boom_driver",
+            "certificate_hash": "ae4faa1295bb23700b939d4ae40c85c1b03f3177"
+          }
+        },
+        {
+          "client_id": "575261100821-kpndmjikquo3ljvr5jbbk8bim2r1kuql.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwLuZU5HqcqGAIVT8qZ2VlvY8l6GqdKVk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "575261100821-kpndmjikquo3ljvr5jbbk8bim2r1kuql.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "575261100821-uraomtnhp2rcfqtgo2o8hl7v4qvbn6rf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.boomDriver"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
