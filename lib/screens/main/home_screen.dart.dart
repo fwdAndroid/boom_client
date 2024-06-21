@@ -5,6 +5,7 @@ import 'package:boom_client/maps/map_service.dart';
 import 'package:boom_client/screens/main/ride_request.dart';
 import 'package:boom_client/screens/profile/edit_profile.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
+import 'package:boom_client/utils/colors.dart';
 import 'package:boom_client/widgets/customer_logout_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,7 +37,6 @@ class _HomePageState extends State<HomePage> {
   String location = 'Please move map to A specific location.';
   final TextEditingController _locationController = TextEditingController();
   BitmapDescriptor? customMarkerIcon;
-  final Completer<GoogleMapController> _completer = Completer();
 
   @override
   void initState() {
@@ -159,52 +159,54 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               ListTile(
-                title: Text("Home"),
+                title: const Text("Home"),
                 leading: Icon(
                   Icons.home,
-                  color: Color(0xffC1C0C9),
+                  color: iconColor,
                 ),
               ),
               ListTile(
-                title: Text("Wallet"),
+                title: const Text("Wallet"),
                 leading: Icon(
                   Icons.wallet,
-                  color: Color(0xffC1C0C9),
+                  color: iconColor,
                 ),
               ),
               ListTile(
-                title: Text("History"),
+                title: const Text("History"),
                 leading: Icon(
                   Icons.history,
-                  color: Color(0xffC1C0C9),
+                  color: iconColor,
                 ),
               ),
               ListTile(
-                title: Text("Notifications"),
+                title: const Text("Notifications"),
                 leading: Icon(
                   Icons.notifications,
-                  color: Color(0xffC1C0C9),
+                  color: iconColor,
                 ),
               ),
               ListTile(
                 onTap: () {
                   shareInviteLink(context);
                 },
-                title: Text("Invite Friends"),
+                title: const Text("Invite Friends"),
                 leading: Icon(
                   Icons.child_friendly_sharp,
-                  color: Color(0xffC1C0C9),
+                  color: iconColor,
                 ),
               ),
               ListTile(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (builder) => EditProfile()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) => const EditProfile()));
                 },
                 title: Text("Setting"),
                 leading: Icon(
                   Icons.settings,
-                  color: Color(0xffC1C0C9),
+                  color: iconColor,
                 ),
               ),
               ListTile(
