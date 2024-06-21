@@ -1,3 +1,4 @@
+import 'package:boom_client/screens/booking/booking_history.dart';
 import 'package:boom_client/screens/profile/edit_profile.dart';
 import 'package:boom_client/utils/colors.dart';
 import 'package:boom_client/widgets/customer_logout_widget.dart';
@@ -72,6 +73,10 @@ class MyDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (builder) => BookingHistory()));
+            },
             title: const Text("History"),
             leading: Icon(
               Icons.history,

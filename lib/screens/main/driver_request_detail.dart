@@ -37,13 +37,14 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-        backgroundColor: Colors.white,
-        onPressed: () {
-          MapFunctions().getUserCurrentLocation();
-        },
-        child: Icon(Icons.location_pin),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          'Ride Request',
+          style: TextStyle(color: colorWhite),
+        ),
+        iconTheme: IconThemeData(color: colorWhite),
+        backgroundColor: mainBtnColor,
       ),
       body: SingleChildScrollView(
         child: StreamBuilder(
@@ -61,17 +62,6 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                         const EdgeInsets.only(left: 8.0, right: 8, top: 16),
                     child: Text(
                       "Select Date",
-                      style: GoogleFonts.manrope(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: colorBlack),
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 8.0, right: 8, top: 16),
-                    child: Text(
-                      "Service Date",
                       style: GoogleFonts.manrope(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -170,7 +160,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Radio<String>(
-                        value: 'Received',
+                        value: 'Yes',
                         groupValue: _selectedValue,
                         onChanged: (String? value) {
                           setState(() {
@@ -180,7 +170,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                       ),
                       Text('Yes'),
                       Radio<String>(
-                        value: 'Gave',
+                        value: 'No',
                         groupValue: _selectedValue,
                         onChanged: (String? value) {
                           setState(() {
@@ -199,7 +189,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                               ),
                             )
                           : SaveButton(
-                              title: "Save",
+                              title: "Send Request",
                               onTap: () async {
                                 if (priceController.text.isEmpty) {
                                   showMessageBar("Price is Required", context);
@@ -214,7 +204,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
 
                                   FirebaseFirestore.instance
                                       .collection("booking")
-                                      .doc()
+                                      .doc(uuid)
                                       .set({
                                     "price": int.parse(priceController.text),
                                     "clientUid":

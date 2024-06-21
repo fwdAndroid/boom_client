@@ -22,20 +22,20 @@ class _HomePageState extends State<HomePage> {
   String googleApikey = googleMapKey;
   GoogleMapController? mapController;
   CameraPosition cameraPosition =
-      const CameraPosition(target: LatLng(51.1657, 10.4515));
+      const CameraPosition(target: LatLng(51.1657, 10.4515), zoom: 14);
   bool _isLoading = false;
-  List latlong = [];
+  List<double> latlong = [];
   String location = 'Please move map to a specific location.';
   final TextEditingController _locationController = TextEditingController();
   BitmapDescriptor? customMarkerIcon;
 
   @override
   void initState() {
-    init();
     super.initState();
+    init();
   }
 
-  init() async {
+  Future<void> init() async {
     await MapFunctions().getUserCurrentLocation().then((value) async {
       print("value.latitude:${value.latitude}");
       markers.add(Marker(
@@ -46,28 +46,29 @@ class _HomePageState extends State<HomePage> {
 
       await loadCustomMarkerIcon();
       await getLatLong();
-      mapController!
-          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition))
-          .then((value) {
-        print('animated');
-      });
+      if (mapController != null) {
+        mapController!
+            .animateCamera(CameraUpdate.newCameraPosition(cameraPosition))
+            .then((value) {
+          print('animated');
+        });
+      }
       setState(() {});
     });
   }
 
   @override
   void dispose() {
-    //  searchController.dispose();
+    // searchController.dispose();
     super.dispose();
   }
 
-  getLatLong() async {
+  Future<void> getLatLong() async {
     setState(() {
       _isLoading = true;
     });
     latlong = await getLocation().getLatLong();
     setState(() {
-      latlong;
       _isLoading = false;
     });
   }
@@ -86,84 +87,81 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    LatLng startLocation = _isLoading
+    LatLng startLocation = _isLoading || latlong.isEmpty
         ? const LatLng(51.1657, 10.4515)
         : LatLng(latlong[0], latlong[1]);
     return Scaffold(
-        appBar: AppBar(),
-        drawer: MyDrawer(),
-        floatingActionButton: FloatingActionButton(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-          backgroundColor: Colors.white,
-          onPressed: () async {
-            Position position = await MapFunctions().getUserCurrentLocation();
-            mapController?.animateCamera(CameraUpdate.newCameraPosition(
-              CameraPosition(
-                  target: LatLng(position.latitude, position.longitude),
-                  zoom: 14),
-            ));
-          },
-          child: Icon(Icons.location_pin),
-        ),
-        body: Stack(
-          children: [
-            SizedBox(
-              height: 600,
-              child: GoogleMap(
-                zoomGesturesEnabled: true,
-                initialCameraPosition: CameraPosition(
-                  target: startLocation, //initial position
-                  zoom: 14.0, //initial zoom level
-                ),
-                markers: Set<Marker>.of(markers),
-                mapType: MapType.normal, //map type
-                onMapCreated: (controller) {
-                  setState(() {
-                    mapController = controller;
-                  });
-                },
-                onCameraMove: (CameraPosition cameraPositiona) {
-                  cameraPosition = cameraPositiona;
-                },
-                onCameraIdle: () async {
-                  List<Placemark> addresses = await placemarkFromCoordinates(
-                      cameraPosition.target.latitude,
-                      cameraPosition.target.longitude);
+      appBar: AppBar(),
+      drawer: MyDrawer(),
+      floatingActionButton: FloatingActionButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        backgroundColor: Colors.white,
+        onPressed: () async {
+          Position position = await MapFunctions().getUserCurrentLocation();
+          mapController?.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(
+                target: LatLng(position.latitude, position.longitude),
+                zoom: 14),
+          ));
+        },
+        child: Icon(Icons.location_pin),
+      ),
+      body: Stack(
+        children: [
+          SizedBox(
+            height: 600,
+            child: GoogleMap(
+              zoomGesturesEnabled: true,
+              initialCameraPosition: cameraPosition, //initial position
+              markers: Set<Marker>.of(markers),
+              mapType: MapType.normal, //map type
+              onMapCreated: (controller) {
+                setState(() {
+                  mapController = controller;
+                });
+              },
+              onCameraMove: (CameraPosition cameraPositiona) {
+                cameraPosition = cameraPositiona;
+              },
+              onCameraIdle: () async {
+                List<Placemark> addresses = await placemarkFromCoordinates(
+                    cameraPosition.target.latitude,
+                    cameraPosition.target.longitude);
 
-                  var first = addresses.first;
-                  print("${first.name} : ${first..administrativeArea}");
+                var first = addresses.first;
+                print("${first.name} : ${first.administrativeArea}");
 
-                  List<Placemark> placemarks = await placemarkFromCoordinates(
-                      cameraPosition.target.latitude,
-                      cameraPosition.target.longitude);
-                  Placemark place = placemarks[0];
-                  location =
-                      '${place.street},${place.subLocality},${place.locality},${place.thoroughfare},';
+                List<Placemark> placemarks = await placemarkFromCoordinates(
+                    cameraPosition.target.latitude,
+                    cameraPosition.target.longitude);
+                Placemark place = placemarks[0];
+                location =
+                    '${place.street}, ${place.subLocality}, ${place.locality}, ${place.thoroughfare}';
 
-                  setState(() {
-                    _locationController.text = location;
-                  });
-                },
-              ),
+                setState(() {
+                  _locationController.text = location;
+                });
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: SaveButton(
-                    title: "Search Ride",
-                    onTap: () async {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (builder) => RideRequest(
-                                    currentLocation: _locationController.text,
-                                  )));
-                    }),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: SaveButton(
+                  title: "Search Ride",
+                  onTap: () async {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => RideRequest(
+                                  currentLocation: _locationController.text,
+                                )));
+                  }),
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }

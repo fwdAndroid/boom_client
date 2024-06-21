@@ -1,4 +1,3 @@
-import 'package:boom_client/screens/main/confrim_location.dart';
 import 'package:boom_client/screens/main/home_screen.dart.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
 import 'package:boom_client/utils/colors.dart';
