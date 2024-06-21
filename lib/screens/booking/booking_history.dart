@@ -1,6 +1,6 @@
-import 'package:boom_client/screens/booking/tabs/bid_request.dart';
+import 'package:boom_client/screens/booking/tabs/my_offers.dart';
 import 'package:boom_client/screens/booking/tabs/completed_request.dart';
-import 'package:boom_client/screens/booking/tabs/current_ride.dart';
+import 'package:boom_client/screens/booking/tabs/driver_offers.dart';
 import 'package:boom_client/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -41,10 +41,10 @@ class _BookingHistoryState extends State<BookingHistory> {
               ),
               tabs: const <Widget>[
                 Tab(
-                  text: "Ride Request",
+                  text: "My Offers",
                 ),
                 Tab(
-                  text: "Current Riders",
+                  text: "Driver Offers",
                 ),
                 Tab(
                   text: "Completed Rides",
@@ -53,7 +53,7 @@ class _BookingHistoryState extends State<BookingHistory> {
             ),
           ),
           body: const TabBarView(
-            children: <Widget>[RideBid(), CurrentRide(), CompletedRide()],
+            children: <Widget>[MyOffers(), DriverOffers(), CompletedRide()],
           ),
         ),
       ),
