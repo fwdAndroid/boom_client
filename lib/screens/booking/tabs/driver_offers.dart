@@ -1,4 +1,4 @@
-import 'package:boom_client/screens/booking/tabs/details/offer_detail.dart';
+import 'package:boom_client/screens/booking/tabs/details/driver_offer_details.dart';
 import 'package:boom_client/utils/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,7 +23,7 @@ class _DriverOffersState extends State<DriverOffers> {
                     .collection("booking")
                     .where("clientUid",
                         isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-                    .where("status", isEqualTo: "recived")
+                    .where("status", isEqualTo: "received")
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
@@ -65,11 +65,11 @@ class _DriverOffersState extends State<DriverOffers> {
                                   ListTile(
                                     leading: CircleAvatar(
                                       backgroundImage: NetworkImage(
-                                        data['clientPhoto'],
+                                        data['driverPhoto'],
                                       ),
                                     ),
-                                    title: Text(data['clientName']),
-                                    subtitle: Text(data['clientEmail']),
+                                    title: Text(data['driverName']),
+                                    subtitle: Text(data['driverEmail']),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -143,7 +143,14 @@ class _DriverOffersState extends State<DriverOffers> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (builder) =>
-                                                  OffersDetail(
+                                                  DriverOfferDetail(
+                                                    driverEmail:
+                                                        data['driverEmail'],
+                                                    driverId: data['driverId'],
+                                                    driverName:
+                                                        data['driverName'],
+                                                    driverPhoto:
+                                                        data['driverPhoto'],
                                                     email: data['clientEmail'],
                                                     clientUid:
                                                         data['clientUid'],
