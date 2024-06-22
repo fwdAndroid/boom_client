@@ -1,4 +1,3 @@
-import 'package:boom_client/maps/map_functions.dart';
 import 'package:boom_client/screens/main/confrim_ride_request.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
 import 'package:boom_client/screens/widgets/text_form_field.dart';
@@ -6,13 +5,11 @@ import 'package:boom_client/utils/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:uuid/uuid.dart';
 
-// ignore: must_be_immutable
 class DriverRequestDetail extends StatefulWidget {
   String destination;
   String currentDestination;
@@ -26,13 +23,18 @@ class DriverRequestDetail extends StatefulWidget {
 class _DriverRequestDetailState extends State<DriverRequestDetail> {
   TextEditingController dateController = TextEditingController();
   TextEditingController timeController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
+  TextEditingController passengersController = TextEditingController();
 
   TimeOfDay? _selectedTime;
   bool isAdded = false;
-  int _currentHorizontalIntValue = 10;
+  int _currentHorizontalIntValue = 0;
   String? _selectedValue = 'Yes';
   var uuid = Uuid().v4();
+
+  // Base values for the fare calculation
+  final double baseFare = 5.0;
+  final double timeRate = 0.5; // cost per minute
+  final double distanceRate = 1.0; // cost per mile
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +107,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                     padding:
                         const EdgeInsets.only(left: 8.0, right: 8, top: 16),
                     child: Text(
-                      "Offer Price",
+                      "Number of Passengers",
                       style: GoogleFonts.manrope(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -115,8 +117,8 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0, right: 8),
                     child: TextFormInputField(
-                      controller: priceController,
-                      hintText: "Price Title",
+                      controller: passengersController,
+                      hintText: "Number of Passengers",
                       textInputType: TextInputType.number,
                     ),
                   ),
@@ -134,8 +136,8 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                   NumberPicker(
                     value: _currentHorizontalIntValue,
                     minValue: 0,
-                    maxValue: 100,
-                    step: 10,
+                    maxValue: 10,
+                    step: 1,
                     itemHeight: 100,
                     axis: Axis.horizontal,
                     onChanged: (value) =>
@@ -191,9 +193,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                           : SaveButton(
                               title: "Send Request",
                               onTap: () async {
-                                if (priceController.text.isEmpty) {
-                                  showMessageBar("Price is Required", context);
-                                } else if (dateController.text.isEmpty) {
+                                if (dateController.text.isEmpty) {
                                   showMessageBar("Date is Required ", context);
                                 } else if (timeController.text.isEmpty) {
                                   showMessageBar("Time is Required ", context);
@@ -202,11 +202,49 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                                     isAdded = true;
                                   });
 
-                                  FirebaseFirestore.instance
+                                  // Calculate urgency multiplier based on current time and selected time
+                                  final currentTime = DateTime.now();
+                                  final selectedDate = DateFormat('yyyy-MM-dd')
+                                      .parse(dateController.text);
+                                  final selectedTime = TimeOfDay(
+                                    hour: int.parse(
+                                        timeController.text.split(":")[0]),
+                                    minute: int.parse(timeController.text
+                                        .split(":")[1]
+                                        .split(" ")[0]),
+                                  );
+                                  final bookingDateTime = DateTime(
+                                    selectedDate.year,
+                                    selectedDate.month,
+                                    selectedDate.day,
+                                    selectedTime.hour,
+                                    selectedTime.minute,
+                                  );
+                                  final durationUntilPickup = bookingDateTime
+                                      .difference(currentTime)
+                                      .inMinutes;
+                                  double urgencyMultiplier = 1.0;
+                                  if (durationUntilPickup < 60) {
+                                    urgencyMultiplier = 2.0;
+                                  } else if (durationUntilPickup < 1440) {
+                                    urgencyMultiplier = 1.5;
+                                  }
+
+                                  // Calculate distance (For example purposes, using a fixed value)
+                                  final double distance =
+                                      10.0; // Example distance value
+
+                                  // Calculate the price based on the formula
+                                  double price = baseFare +
+                                      (timeRate * durationUntilPickup) +
+                                      (distanceRate * distance);
+                                  price += urgencyMultiplier * price;
+
+                                  await FirebaseFirestore.instance
                                       .collection("booking")
                                       .doc(uuid)
                                       .set({
-                                    "price": int.parse(priceController.text),
+                                    "price": price.toInt(),
                                     "clientUid":
                                         FirebaseAuth.instance.currentUser!.uid,
                                     "clientName": snap['fullName'],
@@ -222,15 +260,17 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                                     "driverId": "",
                                     "driverPhoto": "",
                                     "driverEmail": "",
+                                    "driverName": "",
+                                    "passengers": passengersController.text,
                                     "offerPrice": 0,
                                     "currentLocation":
                                         widget.currentDestination,
                                     "destination": widget.destination,
                                   });
+
                                   setState(() {
                                     isAdded = false;
                                   });
-                                  // Handle the result accordingly
 
                                   showMessageBar(
                                       "Ride Request Send Successfully",
@@ -259,7 +299,6 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
     );
 
     if (pickedDate != null && pickedDate != DateTime.now()) {
-      // Update the text field with the selected date
       setState(() {
         dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
       });
@@ -279,16 +318,9 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
       });
     }
   }
-}
 
-//  Navigator.push(
-//                               context,
-//                               MaterialPageRoute(
-//                                   builder: (context) => SelectDriver(
-//                                         destination: widget.destination,
-//                                         location: widget.currentDestination,
-//                                         uid: data['uid'],
-//                                         photoURL: data['photoURL'],
-//                                         fullName: data['fullName'],
-//                                       )),
-//                             );
+  void showMessageBar(String message, BuildContext context) {
+    final snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+}

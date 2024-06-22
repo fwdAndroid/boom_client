@@ -15,12 +15,7 @@ class BookingHistory extends StatefulWidget {
 class _BookingHistoryState extends State<BookingHistory> {
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        final shouldPop = await _showExitDialog(context);
-        return shouldPop ?? false;
-      },
-      child: DefaultTabController(
+    return DefaultTabController(
         initialIndex: 1,
         length: 3,
         child: Scaffold(
@@ -56,7 +51,7 @@ class _BookingHistoryState extends State<BookingHistory> {
             children: <Widget>[MyOffers(), DriverOffers(), CompletedRide()],
           ),
         ),
-      ),
+      
     );
   }
 
