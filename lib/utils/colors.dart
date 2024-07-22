@@ -14,3 +14,7 @@ showMessageBar(String contexts, BuildContext context) {
     duration: Duration(seconds: 3),
   ));
 }
+
+final secondaryTextColor = Color(0xff4F5E7B);
+final dividerColor = Color(0xffEBEBEB);
+final borderColor = Color(0xffEBEBEB);

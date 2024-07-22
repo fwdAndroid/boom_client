@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:boom_client/maps/map_screen.dart';
 import 'package:boom_client/screens/auth/auth_login.dart';
+import 'package:boom_client/screens/dashboard/main_dashboard.dart';
 import 'package:boom_client/screens/main/home_screen.dart.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
 import 'package:boom_client/screens/widgets/text_form_field.dart';
@@ -254,7 +255,7 @@ class SignUpAccount extends State<CustomerSignUp> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (builder) => HomePage()));
+                                      builder: (builder) => MainDashboard()));
                             }
                           }
                         }),

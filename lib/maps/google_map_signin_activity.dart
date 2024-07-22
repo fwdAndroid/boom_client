@@ -1,4 +1,5 @@
 import 'package:boom_client/maps/geolocation_service.dart';
+import 'package:boom_client/screens/dashboard/main_dashboard.dart';
 import 'package:boom_client/screens/main/home_screen.dart.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
 import 'package:boom_client/utils/colors.dart';
@@ -270,7 +271,7 @@ class _GoogleMapSignInActivityState extends State<GoogleMapSignInActivity> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (builder) =>
-                                                    HomePage()));
+                                                    MainDashboard()));
                                       },
                                       title: 'Set Location',
                                     ),

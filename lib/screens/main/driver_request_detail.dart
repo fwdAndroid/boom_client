@@ -4,6 +4,7 @@ import 'package:boom_client/screens/widgets/text_form_field.dart';
 import 'package:boom_client/utils/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
   TextEditingController dateController = TextEditingController();
   TextEditingController timeController = TextEditingController();
   TextEditingController passengersController = TextEditingController();
+  TextEditingController petsController = TextEditingController();
 
   TimeOfDay? _selectedTime;
   bool isAdded = false;
@@ -42,7 +44,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Ride Request',
+          'Request',
           style: TextStyle(color: colorWhite),
         ),
         iconTheme: IconThemeData(color: colorWhite),
@@ -133,18 +135,12 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                           color: colorBlack),
                     ),
                   ),
-                  NumberPicker(
-                    value: _currentHorizontalIntValue,
-                    minValue: 0,
-                    maxValue: 10,
-                    step: 1,
-                    itemHeight: 100,
-                    axis: Axis.horizontal,
-                    onChanged: (value) =>
-                        setState(() => _currentHorizontalIntValue = value),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.black26),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, right: 8),
+                    child: TextFormInputField(
+                      controller: petsController,
+                      hintText: "Number of Pets",
+                      textInputType: TextInputType.number,
                     ),
                   ),
                   Padding(
@@ -252,7 +248,7 @@ class _DriverRequestDetailState extends State<DriverRequestDetail> {
                                     "clientEmail": snap['email'],
                                     "date": dateController.text,
                                     "time": timeController.text,
-                                    "pets": _currentHorizontalIntValue,
+                                    "pets": petsController.text,
                                     "lagages": _selectedValue,
                                     "status": "offers",
                                     "isAccepted": false,

@@ -1,5 +1,6 @@
 import 'package:boom_client/maps/google_map_signin_activity.dart';
 import 'package:boom_client/screens/auth/signup_account.dart';
+import 'package:boom_client/screens/dashboard/main_dashboard.dart';
 import 'package:boom_client/screens/main/home_screen.dart.dart';
 import 'package:boom_client/screens/widgets/save_button.dart';
 import 'package:boom_client/services/auth_methods.dart';
@@ -125,8 +126,10 @@ class _AuthLoginState extends State<AuthLogin> {
                       isLoading = false;
                     });
                     if (rse == 'sucess') {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (builder) => HomePage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (builder) => MainDashboard()));
                     } else {
                       showMessageBar(rse, context);
                     }
@@ -212,7 +215,7 @@ class _AuthLoginState extends State<AuthLogin> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (builder) => HomePage()));
+                                  builder: (builder) => MainDashboard()));
                         }
 
                         setState(() {

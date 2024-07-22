@@ -35,6 +35,7 @@ dependencies:
   firebase_storage: ^12.0.1
   flutter:
     sdk: flutter
+  flutter_credit_card: ^4.0.1
   flutter_google_places_hoc081098: ^2.0.0-beta.1
   geocoding: ^3.0.0
   geolocator: ^12.0.0

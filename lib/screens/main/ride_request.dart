@@ -21,6 +21,7 @@ class RideRequest extends StatefulWidget {
 class _RideRequestState extends State<RideRequest> {
   late TextEditingController currentLocationController;
   late TextEditingController destinationLocationController;
+  List<TextEditingController> additionalControllers = [];
   String googleApikey = googleMapKey;
   String location = 'Please move map to A specific location.';
   GoogleMapController? mapController;
@@ -46,7 +47,16 @@ class _RideRequestState extends State<RideRequest> {
   void dispose() {
     currentLocationController.dispose();
     destinationLocationController.dispose();
+    for (var controller in additionalControllers) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  void addNewDestinationField() {
+    setState(() {
+      additionalControllers.add(TextEditingController());
+    });
   }
 
   @override
@@ -127,81 +137,129 @@ class _RideRequestState extends State<RideRequest> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Column(
+              child: Row(
                 children: [
-                  TextField(
-                    controller: currentLocationController,
-                    decoration: InputDecoration(
-                      suffixIcon: Icon(
-                        Icons.cancel,
-                        color: Colors.grey,
-                      ),
-                      hintStyle: TextStyle(color: Colors.black),
-                      hintText: "Pick Up Point",
-                      fillColor: Colors.white,
-                      filled: true,
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: currentLocationController,
+                          decoration: InputDecoration(
+                            suffixIcon: Icon(
+                              Icons.cancel,
+                              color: Colors.grey,
+                            ),
+                            hintStyle: TextStyle(color: Colors.black),
+                            hintText: "Pick Up Point",
+                            fillColor: Colors.white,
+                            filled: true,
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TextField(
+                          onTap: () async {
+                            var place = await PlacesAutocomplete.show(
+                                context: context,
+                                apiKey: googleApikey,
+                                mode: Mode.overlay,
+                                types: [],
+                                strictbounds: false,
+                                // components: [
+                                //   Component(Component.country, 'ae')
+                                // ],
+                                //google_map_webservice package
+                                onError: (err) {
+                                  print(err);
+                                });
+
+                            if (place != null) {
+                              setState(() {
+                                location = place.description.toString();
+                                destinationLocationController.text = location;
+                              });
+                              final plist = GoogleMapsPlaces(
+                                apiKey: googleApikey,
+                                apiHeaders:
+                                    await GoogleApiHeaders().getHeaders(),
+                                //from google_api_headers package
+                              );
+                              String placeid = place.placeId ?? "0";
+                              final detail =
+                                  await plist.getDetailsByPlaceId(placeid);
+                              final geometry = detail.result.geometry!;
+                              final lat = geometry.location.lat;
+                              final lang = geometry.location.lng;
+                              var newlatlang = LatLng(lat, lang);
+                              mapController?.animateCamera(
+                                  CameraUpdate.newCameraPosition(CameraPosition(
+                                      target: newlatlang, zoom: 17)));
+                            }
+                          },
+                          controller: destinationLocationController,
+                          decoration: InputDecoration(
+                            suffixIcon: Icon(
+                              Icons.cancel,
+                              color: Colors.grey,
+                            ),
+                            hintStyle: TextStyle(color: Colors.black),
+                            hintText: "Destination",
+                            fillColor: Colors.white,
+                            filled: true,
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                          ),
+                        ),
+                        for (var controller in additionalControllers)
+                          Column(
+                            children: [
+                              SizedBox(height: 8),
+                              TextField(
+                                controller: controller,
+                                decoration: InputDecoration(
+                                  suffixIcon: Icon(
+                                    Icons.cancel,
+                                    color: Colors.grey,
+                                  ),
+                                  hintStyle: TextStyle(color: Colors.black),
+                                  hintText: "Additional Destination",
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20)),
+                                  errorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20)),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20)),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 8),
-                  TextField(
-                    onTap: () async {
-                      var place = await PlacesAutocomplete.show(
-                          context: context,
-                          apiKey: googleApikey,
-                          mode: Mode.overlay,
-                          types: [],
-                          strictbounds: false,
-                          // components: [
-                          //   Component(Component.country, 'ae')
-                          // ],
-                          //google_map_webservice package
-                          onError: (err) {
-                            print(err);
-                          });
-
-                      if (place != null) {
-                        setState(() {
-                          location = place.description.toString();
-                          destinationLocationController.text = location;
-                        });
-                        final plist = GoogleMapsPlaces(
-                          apiKey: googleApikey,
-                          apiHeaders: await GoogleApiHeaders().getHeaders(),
-                          //from google_api_headers package
-                        );
-                        String placeid = place.placeId ?? "0";
-                        final detail = await plist.getDetailsByPlaceId(placeid);
-                        final geometry = detail.result.geometry!;
-                        final lat = geometry.location.lat;
-                        final lang = geometry.location.lng;
-                        var newlatlang = LatLng(lat, lang);
-                        mapController?.animateCamera(
-                            CameraUpdate.newCameraPosition(
-                                CameraPosition(target: newlatlang, zoom: 17)));
-                      }
-                    },
-                    controller: destinationLocationController,
-                    decoration: InputDecoration(
-                      suffixIcon: Icon(
-                        Icons.cancel,
-                        color: Colors.grey,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        onTap: addNewDestinationField,
+                        child: Container(
+                          margin: EdgeInsets.only(top: 45),
+                          child: Align(
+                              alignment: AlignmentDirectional.topEnd,
+                              child: Icon(Icons.add)),
+                        ),
                       ),
-                      hintStyle: TextStyle(color: Colors.black),
-                      hintText: "Destination",
-                      fillColor: Colors.white,
-                      filled: true,
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
                     ),
                   ),
                 ],

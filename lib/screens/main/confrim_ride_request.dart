@@ -1,3 +1,4 @@
+import 'package:boom_client/screens/dashboard/main_dashboard.dart';
 import 'package:boom_client/screens/main/home_screen.dart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,7 +38,7 @@ class _ConfrimRideRequestState extends State<ConfrimRideRequest> {
             child: TextButton(
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (builder) => HomePage()));
+                      MaterialPageRoute(builder: (builder) => MainDashboard()));
                 },
                 child: Text(
                   "Close",
